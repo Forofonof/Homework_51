@@ -31,7 +31,7 @@ class ViewPrisoners
         ShowPrisoners();
     }
 
-    public void ShowPrisoners()
+    private void ShowPrisoners()
     {
         Console.WriteLine("Список заключенных:\n");
 
