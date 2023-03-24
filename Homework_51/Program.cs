@@ -1,33 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 class Program
 {
     static void Main(string[] args)
     {
         Jail jail = new Jail();
-        ViewPrisoners viewPrisoners = new ViewPrisoners(jail);
-        FreePrisoners freePrisoners = new FreePrisoners(jail);
+        Menu prisonersMenu = new Menu(jail);
 
-        viewPrisoners.Work();
-        freePrisoners.Work();
-        viewPrisoners.Work();
+        prisonersMenu.Work();
     }
 }
 
-class ViewPrisoners
+class Menu
 {
     private readonly Jail _jail;
-    private readonly List<Prisoner> _prisoners;
 
-    public ViewPrisoners(Jail jail)
+    public Menu(Jail jail)
     {
         _jail = jail;
-        _prisoners = _jail.GetPrisoners();
     }
 
     public void Work()
     {
+        ShowPrisoners();
+
+        Console.WriteLine("\nВ нашей великой стране Арстоцка произошла амнистия!\n");
+
+        _jail.ReleasePrisoners("Антиправительственное");
+
         ShowPrisoners();
     }
 
@@ -35,39 +37,16 @@ class ViewPrisoners
     {
         Console.WriteLine("Список заключенных:\n");
 
-        foreach (Prisoner prisoner in _prisoners)
+        foreach (Prisoner prisoner in _jail.GetPrisoners())
         {
             Console.WriteLine($"{prisoner.FullName} - {prisoner.Crime}");
         }
     }
 }
 
-class FreePrisoners
-{
-    private readonly Jail _jail;
-
-    public FreePrisoners(Jail jail)
-    {
-        _jail = jail;
-    }
-
-    public void Work()
-    {
-        Console.WriteLine("\nВ нашей великой стране Арстоцка произошла амнистия!\n");
-
-        ReleasePrisoners();
-    }
-
-    private void ReleasePrisoners()
-    {
-        string amnestyCrime = "Антиправительственное";
-        _jail.ReleasePrisonersByCrime(amnestyCrime);
-    }
-}
-
 class Jail
 {
-    private readonly List<Prisoner> _prisoners = new List<Prisoner>();
+    private List<Prisoner> _prisoners = new List<Prisoner>();
 
     public Jail()
     {
@@ -79,14 +58,14 @@ class Jail
         _prisoners.Add(new Prisoner("Исаков Даниил Львович", "Антиправительственное"));
     }
 
-    public List<Prisoner> GetPrisoners()
+    public IReadOnlyList<Prisoner> GetPrisoners()
     {
-        return _prisoners;
+        return _prisoners.AsReadOnly();
     }
 
-    public void ReleasePrisonersByCrime(string crime)
+    public void ReleasePrisoners(string amnestyCrime)
     {
-        _prisoners.RemoveAll(prisoner => prisoner.Crime == crime);
+        _prisoners = _prisoners.Where(prisoner => prisoner.Crime != amnestyCrime).ToList();
     }
 }
 
@@ -100,5 +79,5 @@ class Prisoner
 
     public string FullName { get; private set; }
 
-    public string Crime { get; private set; } 
+    public string Crime { get; private set; }
 }
